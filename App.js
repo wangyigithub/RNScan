@@ -40,7 +40,6 @@ class HomeScreen extends React.Component {
         const itemId = this.state.text;
             return (
                 <View style={{flex: 1, alignItems: 'center',}}>
-                    <ActivityIndicator size="large" color="#0000ff" animating={this.state.isLoading}/>
                     <View style={{flexDirection: 'row', alignItems: 'center', margin: 10}}>
                         <Text>
                             {'请输入批次号码：'}
@@ -68,11 +67,15 @@ class HomeScreen extends React.Component {
                         <Button
                             title="去扫描"
                             onPress={() => {
+                                this.setState({
+                                    text: '',
+                                    number:'',
+                                });
                                 this.props.navigation.navigate('Details',{
-                                    callback: (backdata) => {
-                                        this.setState({
-                                            text:backdata,
-                                        })
+                                    callback: (number) => {
+                                        // this.setState({
+                                        //     number:number,
+                                        // })
                                     }
                                 })
                             }}
@@ -81,14 +84,11 @@ class HomeScreen extends React.Component {
                             title="去查询"
                             onPress={() => {
                                 if (itemId === '' || itemId === null || itemId === undefined) return;
-                                this.setState({
-                                    isLoading:true
-                                });
-                                this.fechData(itemId);
+                                  this.fechData(itemId);
                             }}
                         />
                     </View>
-                    {this.state.number === 0?null:<View style={{flex:1,marginTop:40,justifyContent:'center',alignItems:'center'}}>
+                    {this.state.number === 0||this.state.number===null?null:<View style={{flex:1,marginTop:40,justifyContent:'center',alignItems:'center'}}>
                         <Text style={{flexDirection: 'row',}}>
                             批次号：<Text style={{color: 'red'}}> {itemId}</Text>
                         </Text>
@@ -98,9 +98,10 @@ class HomeScreen extends React.Component {
                 </View>
             );
     }
-
     fechData(itemId) {
-        itemId = 3064001518;
+        this.setState({
+            isLoading:true
+        });
         fetch('http://220.189.234.2:17234/xiyilang/stick/search_by_makeup_code?makeup_code=' + itemId, {
             method: 'GET',
             headers: {
@@ -110,35 +111,67 @@ class HomeScreen extends React.Component {
             .then((responseData) => {//1
                 this.setState({
                     isLoading:false,
-                    number: responseData.data.stickLogList[0].stickId
-                })
+                    number:responseData.data.stickLogList[0].stickId
+                });
             }).catch((err) => {//2
-            alert(err);
+            alert('没有查询到杆子');
             this.setState({
                 isLoading:false
             });
         });
     }
+
 }
 
 
-class ScannerScreen extends Component<Props> {
+class ScannerScreen extends Component{
     static navigationOptions = {
         title: '扫描',
     };
+    constructor(props) {
+        super(props);
+        this.state = {
+            isLoading:false
+        };
+    }
 
+    fechData(itemId) {
+        this.setState({
+            isLoading:true
+        });
+        fetch('http://220.189.234.2:17234/xiyilang/stick/search_by_makeup_code?makeup_code=' + itemId, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then((response) => response.json())
+            .then((responseData) => {//1
+                this.setState({
+                    isLoading:false,
+                });
+                alert("杆号：  "+responseData.data.stickLogList[0].stickId);
+            }).catch((err) => {//2
+            alert('没有查询到杆子');
+            this.setState({
+                isLoading:false
+            });
+        });
+    }
     onSuccess(e) {
-        this.goback(e.data)
+        if(e.data!==null&&e.data!==undefined&&e.data!==''){
+            this.fechData(e.data);
+        }
     }
 
-    goback(itemId) {
-        this.props.navigation.state.params.callback(itemId);
-        this.props.navigation.goBack();
-    }
+    // goback(itemId) {
+    //     this.props.navigation.state.params.callback(itemId);
+    //     this.props.navigation.goBack();
+    // }
 
     render() {
         return (
             <View style={styles.container}>
+                <ActivityIndicator size="large" color="#0000ff" animating={this.state.isLoading}/>
                 <QRCodeScanner
                     ref={(node) => {
                         this.scanner = node
@@ -152,7 +185,7 @@ class ScannerScreen extends Component<Props> {
                                               onPress={() => {
                                                   this.props.navigation.goBack();
                                               }}>
-                                <Text style={styles.buttonText}>返回</Text>
+                                <Text style={styles.buttonText}>去输入查询</Text>
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.buttonTouchable}
                                               onPress={() => {
