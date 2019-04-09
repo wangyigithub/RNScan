@@ -102,7 +102,7 @@ class HomeScreen extends React.Component {
         this.setState({
             isLoading:true
         });
-        fetch('http://220.189.234.2:17234/xiyilang/stick/search_by_makeup_code?makeup_code=' + itemId, {
+        fetch('http://61.175.120.10:17234/xiyilang/stick/search_by_makeup_code?makeup_code=' + itemId, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -139,7 +139,7 @@ class ScannerScreen extends Component{
         this.setState({
             isLoading:true
         });
-        fetch('http://220.189.234.2:17234/xiyilang/stick/search_by_makeup_code?makeup_code=' + itemId, {
+        fetch('http://61.175.120.10:17234/xiyilang/stick/search_by_makeup_code?makeup_code=' + itemId, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
